@@ -6,6 +6,7 @@ export default function Header() {
       <ToolBar>
         <Typography variant="h6" component="div">
           Header
+          Tal
         </Typography>
       </ToolBar>
     </AppBar>
