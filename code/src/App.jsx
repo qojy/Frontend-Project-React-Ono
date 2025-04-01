@@ -9,6 +9,7 @@ import NewOrder from "./Components/NewOrder.jsx";
 import OrderHistory from "./Components/OrderHistory.jsx";
 import OrderStatus from "./Components/OrderStatus.jsx";
 import StudentsList from "./Components/StudentsList.jsx";
+import ClassForm from "./Components/ClassForm.jsx";
 function App() {
   return (
     <>
@@ -23,6 +24,7 @@ function App() {
         <Route path="/OrderHistory" element={<OrderHistory />} />
         <Route path="/OrderStatus" element={<OrderStatus />} />
         <Route path="/StudentList" element={<StudentsList />} />
+        <Route path="/ClassForm" element={<ClassForm />} />
       </Routes>
     </>
   );
