@@ -6,6 +6,7 @@
     "@mui/joy": "^5.0.0-beta.51",
     "@mui/material": "^6.4.8",
     "@mui/styled-engine-sc": "^6.4.6",
+    "date-fns": "^4.1.0",
     "dom": "^0.0.3",
     "react": "^19.0.0",
     "router": "^2.1.0",

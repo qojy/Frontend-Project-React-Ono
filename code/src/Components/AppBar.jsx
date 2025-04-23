@@ -2,7 +2,6 @@ import * as React from "react";
 import { styled } from "@mui/material/styles";
 import MuiAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import Drawer from "@mui/material/Drawer";
@@ -19,6 +18,7 @@ import HelpIcon from "@mui/icons-material/Help";
 import PeopleIcon from "@mui/icons-material/People";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { Box } from "@mui/material";
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -28,9 +28,16 @@ const AppBar = styled(MuiAppBar, {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
+  backgroundColor: "#1a237e", // Dark blue color
 }));
 
 const drawerWidth = 240;
+
+const Logo = styled("img")({
+  height: "50px",
+  marginRight: "16px",
+  objectFit: "contain",
+});
 
 export default function CustomAppBar() {
   const [open, setOpen] = React.useState(false);
@@ -46,7 +53,6 @@ export default function CustomAppBar() {
     { text: "Students List", icon: <PeopleIcon />, path: "/studentlist" },
     { text: "Menu", icon: <RestaurantIcon />, path: "/menu" },
     { text: "Active Orders", icon: <ListAltIcon />, path: "/activeorders" },
-    { text: "Order Status", icon: <CheckCircleIcon />, path: "/orderstatus" },
     { text: "Order History", icon: <HistoryIcon />, path: "/orderhistory" },
     { text: "Help", icon: <HelpIcon />, path: "/help" },
   ];
@@ -64,9 +70,28 @@ export default function CustomAppBar() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Ono
-          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexGrow: 1,
+              justifyContent: "center",
+              height: "64px",
+            }}
+          >
+            <Logo
+              src="/ono-logo.png"
+              alt="Ono Cafeteria"
+              onClick={() => navigate("/")}
+              sx={{
+                cursor: "pointer",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                  transition: "transform 0.2s ease-in-out",
+                },
+              }}
+            />
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -100,6 +125,7 @@ export default function CustomAppBar() {
           ))}
         </List>
       </Drawer>
+      <Toolbar /> {/* Add spacing below AppBar */}
     </>
   );
 }
