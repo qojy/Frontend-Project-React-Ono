@@ -1,7 +1,10 @@
-import React from "react"
+import React from "react";
+import Layout from "./Layout";
 
 export default function Menu() {
   return (
-    <div>Menu</div>
-  )
+    <Layout>
+      <div>Menu Content</div>
+    </Layout>
+  );
 }

@@ -1,7 +1,10 @@
-import React from "react"
+import React from "react";
+import Layout from "./Layout";
 
 export default function OrderHistory() {
   return (
-    <div>OrderHistory</div>
-  )
+    <Layout>
+      <div>Order History Content</div>
+    </Layout>
+  );
 }
