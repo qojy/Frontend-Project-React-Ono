@@ -35,7 +35,36 @@ export default function Homepage() {
 
   return (
     <Layout>
-      <div>Homepage Content</div>
+      <Box sx={{ flexGrow: 1, p: 3 }}>
+        <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
+          Welcome to Ono
+        </Typography>
+        <Grid container spacing={3}>
+          {menuItems.map((item) => (
+            <Grid item xs={12} sm={6} md={3} key={item.title}>
+              <Card
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  "&:hover": {
+                    boxShadow: 6,
+                    cursor: "pointer",
+                  },
+                }}
+                onClick={() => navigate(item.path)}
+              >
+                <CardContent sx={{ flexGrow: 1, textAlign: "center" }}>
+                  {item.icon}
+                  <Typography variant="h6" component="div" sx={{ mt: 2 }}>
+                    {item.title}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
     </Layout>
   );
 }
