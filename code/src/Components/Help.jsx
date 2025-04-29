@@ -69,7 +69,7 @@ export default function Help() {
 
   return (
     <Layout>
-      <Container maxWidth="md">
+      <Container maxWidth={false} sx={{ maxWidth: "100%" }}>
         <Box sx={{ py: 4 }}>
           <Typography
             variant="h3"

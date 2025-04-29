@@ -85,6 +85,13 @@ export default function NewOrder() {
     return cart.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
+  const getTotalPrepTime = () => {
+    // Calculate prep time for each unique item (considering quantity)
+    const itemPrepTimes = cart.map((item) => item.prepTime * item.quantity);
+    // Return the maximum prep time
+    return Math.max(...itemPrepTimes, 0);
+  };
+
   const handlePlaceOrder = () => {
     if (!selectedClass) {
       alert("Please select a class");
@@ -134,14 +141,7 @@ export default function NewOrder() {
 
   return (
     <Layout>
-      <Container
-        maxWidth={false}
-        sx={{
-          maxWidth: "1200px",
-          mx: "auto",
-          px: { xs: 2, sm: 3, md: 4 },
-        }}
-      >
+      <Container maxWidth={false} sx={{ maxWidth: "100%" }}>
         <Box
           sx={{
             py: 4,
@@ -152,17 +152,16 @@ export default function NewOrder() {
             width: "100%",
           }}
         >
-          <Typography
-            variant="h3"
-            align="center"
-            sx={{
-              fontWeight: 600,
-              color: "primary.main",
-              mb: 2,
-            }}
-          >
-            New Order
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
+            <Typography
+              variant="h5"
+              component="h2"
+              sx={{ color: "primary.main" }}
+            >
+              New Order
+            </Typography>
+            <Box sx={{ flexGrow: 1 }} />
+          </Box>
 
           {/* Order Details Section */}
           <Paper
@@ -305,17 +304,32 @@ export default function NewOrder() {
                       >
                         {item.name}
                       </Typography>
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          ID: {item.id}
+                        </Typography>
+                      </Box>
                       <Typography
                         variant="body1"
                         color="text.secondary"
                         sx={{
-                          mb: 3,
+                          mb: 2,
                           minHeight: "3em",
                           lineHeight: 1.5,
                         }}
                       >
                         {item.description}
                       </Typography>
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          Allergens: {item.allergens || "None"}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          Prep Time: {item.prepTime} min
+                        </Typography>
+                      </Box>
                       <Typography
                         variant="h5"
                         color="primary"
@@ -453,7 +467,19 @@ export default function NewOrder() {
                     <TableHead>
                       <TableRow>
                         <TableCell sx={{ fontSize: "1.1rem", fontWeight: 600 }}>
+                          ID
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "1.1rem", fontWeight: 600 }}>
                           Dish Name
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "1.1rem", fontWeight: 600 }}>
+                          Allergens
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          sx={{ fontSize: "1.1rem", fontWeight: 600 }}
+                        >
+                          Prep Time (min)
                         </TableCell>
                         <TableCell
                           align="right"
@@ -485,7 +511,16 @@ export default function NewOrder() {
                       {cart.map((item) => (
                         <TableRow key={item.id}>
                           <TableCell sx={{ fontSize: "1rem" }}>
+                            {item.id}
+                          </TableCell>
+                          <TableCell sx={{ fontSize: "1rem" }}>
                             {item.name}
+                          </TableCell>
+                          <TableCell sx={{ fontSize: "1rem" }}>
+                            {item.allergens || "None"}
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontSize: "1rem" }}>
+                            {item.prepTime}
                           </TableCell>
                           <TableCell align="right" sx={{ fontSize: "1rem" }}>
                             {item.price}
@@ -566,7 +601,26 @@ export default function NewOrder() {
                       <TableRow>
                         <TableCell colSpan={3} align="right">
                           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            Total:
+                            Total Prep Time:
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 600,
+                              color: "primary.main",
+                            }}
+                          >
+                            {getTotalPrepTime()} min
+                          </Typography>
+                        </TableCell>
+                        <TableCell colSpan={4} />
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={3} align="right">
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            Total Price:
                           </Typography>
                         </TableCell>
                         <TableCell align="right">
@@ -580,7 +634,7 @@ export default function NewOrder() {
                             ₪{getTotalPrice()}
                           </Typography>
                         </TableCell>
-                        <TableCell />
+                        <TableCell colSpan={4} />
                       </TableRow>
                     </TableFooter>
                   </Table>

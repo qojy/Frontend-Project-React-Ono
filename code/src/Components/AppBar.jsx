@@ -1,5 +1,5 @@
-import * as React from "react";
-import { styled } from "@mui/material/styles";
+import React from "react";
+import { styled, useTheme } from "@mui/material/styles";
 import MuiAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
@@ -17,7 +17,6 @@ import HistoryIcon from "@mui/icons-material/History";
 import HelpIcon from "@mui/icons-material/Help";
 import PeopleIcon from "@mui/icons-material/People";
 import ListAltIcon from "@mui/icons-material/ListAlt";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box } from "@mui/material";
 
 const AppBar = styled(MuiAppBar, {
@@ -28,7 +27,7 @@ const AppBar = styled(MuiAppBar, {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  backgroundColor: "#1a237e", // Dark blue color
+  backgroundColor: theme.palette.primary.main,
 }));
 
 const drawerWidth = 240;
@@ -42,6 +41,7 @@ const Logo = styled("img")({
 export default function CustomAppBar() {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -54,7 +54,11 @@ export default function CustomAppBar() {
     { text: "Menu", icon: <RestaurantIcon />, path: "/menu" },
     { text: "Active Orders", icon: <ListAltIcon />, path: "/activeorders" },
     { text: "Order History", icon: <HistoryIcon />, path: "/orderhistory" },
-    { text: "Help", icon: <HelpIcon />, path: "/help" },
+    {
+      text: "Help",
+      icon: <HelpIcon sx={{ color: "primary.main" }} />,
+      path: "/help",
+    },
   ];
 
   return (
@@ -101,6 +105,7 @@ export default function CustomAppBar() {
           "& .MuiDrawer-paper": {
             width: drawerWidth,
             boxSizing: "border-box",
+            backgroundColor: theme.palette.background.paper,
           },
         }}
         variant="temporary"
@@ -118,14 +123,27 @@ export default function CustomAppBar() {
                 navigate(item.path);
                 setOpen(false);
               }}
+              sx={{
+                "&:hover": {
+                  backgroundColor: theme.palette.action.hover,
+                },
+              }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemIcon sx={{ color: theme.palette.primary.main }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.text}
+                primaryTypographyProps={{
+                  color: "black",
+                  fontWeight: 500,
+                }}
+              />
             </ListItem>
           ))}
         </List>
       </Drawer>
-      <Toolbar /> {/* Add spacing below AppBar */}
+      <Toolbar />
     </>
   );
 }

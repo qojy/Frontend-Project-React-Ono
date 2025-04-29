@@ -9,6 +9,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import HistoryIcon from "@mui/icons-material/History";
 import HelpIcon from "@mui/icons-material/Help";
+import Typography from "@mui/material/Typography";
 
 const StyledBottomNavigation = styled(BottomNavigation)(({ theme }) => ({
   width: "100%",
@@ -50,8 +51,14 @@ export default function CustomNavBar() {
         <BottomNavigationAction label="Classes" icon={<SchoolIcon />} />
         <BottomNavigationAction label="Menu" icon={<RestaurantIcon />} />
         <BottomNavigationAction label="History" icon={<HistoryIcon />} />
-        <BottomNavigationAction label="Help" icon={<HelpIcon />} />
+        <BottomNavigationAction
+          label="Help"
+          icon={<HelpIcon sx={{ color: "primary.main" }} />}
+        />
       </StyledBottomNavigation>
+      <Typography variant="h6" component="div" sx={{ color: "primary.main" }}>
+        Ono Cafeteria
+      </Typography>
     </Paper>
   );
 }

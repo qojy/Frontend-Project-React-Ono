@@ -74,6 +74,16 @@ export default function ActiveOrders() {
       .join(", ");
   };
 
+  const getTotalPrepTime = (items) => {
+    // Calculate prep time for each item considering quantity
+    const itemPrepTimes = items.map((item) => {
+      const menuItem = menuItems.find((m) => m.id === item.id);
+      return menuItem ? menuItem.prepTime * item.quantity : 0;
+    });
+    // Return the maximum prep time
+    return Math.max(...itemPrepTimes, 0);
+  };
+
   const handleStatusChange = (order) => {
     setSelectedOrder(order);
     setNewStatus(order.status);
@@ -103,19 +113,18 @@ export default function ActiveOrders() {
 
   return (
     <Layout>
-      <Container maxWidth="lg">
+      <Container maxWidth={false} sx={{ maxWidth: "100%" }}>
         <Box sx={{ py: 4 }}>
-          <Typography
-            variant="h3"
-            align="center"
-            sx={{
-              mb: 4,
-              fontWeight: 600,
-              color: "primary.main",
-            }}
-          >
-            Active Orders
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
+            <Typography
+              variant="h5"
+              component="h2"
+              sx={{ color: "primary.main" }}
+            >
+              Active Orders
+            </Typography>
+            <Box sx={{ flexGrow: 1 }} />
+          </Box>
 
           <TableContainer
             component={Paper}
@@ -130,6 +139,9 @@ export default function ActiveOrders() {
                   <TableCell sx={{ fontWeight: 600 }}>Class</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Items</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Total Price</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600 }}>
+                    Prep Time (min)
+                  </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
@@ -138,7 +150,7 @@ export default function ActiveOrders() {
               <TableBody>
                 {orders.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} align="center">
+                    <TableCell colSpan={9} align="center">
                       <Typography variant="subtitle1" sx={{ py: 3 }}>
                         No active orders found
                       </Typography>
@@ -152,6 +164,9 @@ export default function ActiveOrders() {
                       <TableCell>{order.className}</TableCell>
                       <TableCell>{getItemDetails(order.items)}</TableCell>
                       <TableCell>₪{order.totalPrice}</TableCell>
+                      <TableCell align="right">
+                        {getTotalPrepTime(order.items)}
+                      </TableCell>
                       <TableCell>
                         {format(new Date(order.date), "MMM d, yyyy HH:mm")}
                       </TableCell>

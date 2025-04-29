@@ -80,8 +80,8 @@ export default function OrderHistory() {
       <Container maxWidth="lg">
         <Box sx={{ py: 4 }}>
           <Typography
-            variant="h3"
-            align="center"
+            variant="h5"
+            component="h2"
             sx={{
               mb: 4,
               fontWeight: 600,
