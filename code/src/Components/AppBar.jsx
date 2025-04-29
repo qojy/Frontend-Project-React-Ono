@@ -50,7 +50,7 @@ export default function CustomAppBar() {
   const menuItems = [
     { text: "Home", icon: <HomeIcon />, path: "/" },
     { text: "Manage Classes", icon: <SchoolIcon />, path: "/manageclasses" },
-    { text: "Students List", icon: <PeopleIcon />, path: "/studentlist" },
+    { text: "Students List", icon: <PeopleIcon />, path: "/studentslist" },
     { text: "Menu", icon: <RestaurantIcon />, path: "/menu" },
     { text: "Active Orders", icon: <ListAltIcon />, path: "/activeorders" },
     { text: "Order History", icon: <HistoryIcon />, path: "/orderhistory" },
