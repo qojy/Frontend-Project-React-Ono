@@ -24,6 +24,7 @@ import Layout from "./Layout";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import { addStudent } from "../firebase/students";
 
 export default function StudentsList() {
   const [students, setStudents] = useState([]);
@@ -45,6 +46,10 @@ export default function StudentsList() {
     localStorage.setItem("students", JSON.stringify(updatedStudents));
     setStudents(updatedStudents);
   };
+
+  addStudent(students).then(() => {
+    navigate("/students");
+  });
 
   const handleOpenDialog = (student = null) => {
     if (student) {
