@@ -24,7 +24,13 @@ import Layout from "./Layout";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { addStudent } from "../firebase/students";
+import {
+  getStudents,
+  addStudent,
+  updateStudent,
+  deleteStudent,
+  checkStudentIdExists,
+} from "../firebase/students";
 
 export default function StudentsList() {
   const [students, setStudents] = useState([]);
@@ -32,31 +38,33 @@ export default function StudentsList() {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    fullName: "",
     id: "",
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadedStudents = JSON.parse(localStorage.getItem("students") || "[]");
-    setStudents(loadedStudents);
+    loadStudents();
   }, []);
 
-  const saveToLocalStorage = (updatedStudents) => {
-    localStorage.setItem("students", JSON.stringify(updatedStudents));
-    setStudents(updatedStudents);
+  const loadStudents = async () => {
+    try {
+      const loadedStudents = await getStudents();
+      setStudents(loadedStudents);
+    } catch (error) {
+      console.error("Error loading students:", error);
+      alert("Error loading students. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
-
-  addStudent(students).then(() => {
-    navigate("/students");
-  });
 
   const handleOpenDialog = (student = null) => {
     if (student) {
       setFormData(student);
       setSelectedStudent(student);
     } else {
-      setFormData({ firstName: "", lastName: "", id: "" });
+      setFormData({ fullName: "", id: "" });
       setSelectedStudent(null);
     }
     setOpenDialog(true);
@@ -64,7 +72,7 @@ export default function StudentsList() {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setFormData({ firstName: "", lastName: "", id: "" });
+    setFormData({ fullName: "", id: "" });
     setSelectedStudent(null);
   };
 
@@ -86,36 +94,55 @@ export default function StudentsList() {
     }));
   };
 
-  const handleSubmit = () => {
-    if (!formData.firstName || !formData.lastName || !formData.id) {
+  const handleSubmit = async () => {
+    if (!formData.fullName || !formData.id) {
       alert("Please fill in all fields");
       return;
     }
 
-    let updatedStudents;
-    if (selectedStudent) {
-      // Edit existing student
-      updatedStudents = students.map((s) =>
-        s.id === selectedStudent.id ? { ...formData } : s
-      );
-    } else {
-      // Add new student
-      if (students.some((s) => s.id === formData.id)) {
-        alert("A student with this ID already exists");
-        return;
+    try {
+      if (selectedStudent) {
+        // Edit existing student
+        await updateStudent(selectedStudent.id, formData);
+      } else {
+        // Check if student ID already exists
+        const exists = await checkStudentIdExists(formData.id);
+        if (exists) {
+          alert("A student with this ID already exists");
+          return;
+        }
+        // Add new student
+        await addStudent(formData);
       }
-      updatedStudents = [...students, formData];
+
+      await loadStudents(); // Reload the students list
+      handleCloseDialog();
+    } catch (error) {
+      console.error("Error saving student:", error);
+      alert("Error saving student. Please try again.");
     }
-
-    saveToLocalStorage(updatedStudents);
-    handleCloseDialog();
   };
 
-  const handleDelete = () => {
-    const updatedStudents = students.filter((s) => s.id !== selectedStudent.id);
-    saveToLocalStorage(updatedStudents);
-    handleCloseDeleteDialog();
+  const handleDelete = async () => {
+    try {
+      await deleteStudent(selectedStudent.id);
+      await loadStudents(); // Reload the students list
+      handleCloseDeleteDialog();
+    } catch (error) {
+      console.error("Error deleting student:", error);
+      alert("Error deleting student. Please try again.");
+    }
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <Container>
+          <Typography>Loading students...</Typography>
+        </Container>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -149,9 +176,7 @@ export default function StudentsList() {
               <TableBody>
                 {students.map((student) => (
                   <TableRow key={student.id}>
-                    <TableCell>
-                      {student.firstName} {student.lastName}
-                    </TableCell>
+                    <TableCell>{student.fullName}</TableCell>
                     <TableCell>{student.id}</TableCell>
                     <TableCell align="right">
                       <IconButton
@@ -189,20 +214,11 @@ export default function StudentsList() {
               <TextField
                 autoFocus
                 margin="dense"
-                name="firstName"
-                label="First Name"
+                name="fullName"
+                label="Full Name"
                 type="text"
                 fullWidth
-                value={formData.firstName}
-                onChange={handleInputChange}
-              />
-              <TextField
-                margin="dense"
-                name="lastName"
-                label="Last Name"
-                type="text"
-                fullWidth
-                value={formData.lastName}
+                value={formData.fullName}
                 onChange={handleInputChange}
               />
               <TextField
@@ -228,8 +244,8 @@ export default function StudentsList() {
           <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogContent>
-              Are you sure you want to delete {selectedStudent?.firstName}{" "}
-              {selectedStudent?.lastName}? This action cannot be undone.
+              Are you sure you want to delete {selectedStudent?.fullName}? This
+              action cannot be undone.
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
