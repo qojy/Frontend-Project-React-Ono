@@ -7,12 +7,12 @@ import Menu from "./Components/Menu.jsx";
 import NewOrder from "./Components/NewOrder.jsx";
 import OrderHistory from "./Components/OrderHistory.jsx";
 import StudentsList from "./Components/StudentsList.jsx";
-import AppBar from "./Components/AppBar.jsx";
+import NavBar from "./Components/NavBar.jsx";
 
 function App() {
   return (
     <>
-      <AppBar />
+      <NavBar />
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/help" element={<Help />} />

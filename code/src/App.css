@@ -1,8 +1,16 @@
+html,
+body,
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: #f5f6fa;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
 }
 
 .logo {
@@ -39,4 +47,48 @@
 
 .read-the-docs {
   color: #888;
+}
+
+.u-btn-bluegray {
+  color: black !important;
+}
+
+.scrolltop,
+.btn.btn-primary {
+  background-color: #b3d236;
+  color: black;
+}
+
+.btn-check:checked + .btn.btn-primary,
+.btn-check:active + .btn.btn-primary,
+.btn.btn-primary:focus:not(.btn-active),
+.btn.btn-primary:hover:not(.btn-active),
+.btn.btn-primary:active:not(.btn-active),
+.btn.btn-primary.active,
+.btn.btn-primary.show,
+.show > .btn.btn-primary {
+  background-color: #b3d236 !important;
+  color: black;
+}
+
+.color-green {
+  color: #b3d236;
+}
+
+.card .g-brd-primary .rounded-0 {
+  background-color: #95ad0c;
+}
+
+.text-white {
+  color: #000000 !important;
+}
+.card .g-brd-primary .rounded-0 {
+  background-color: #b3d135;
+}
+
+.modal {
+  z-index: 10000;
+}
+.ul li::before {
+  color: #b3d236;
 }

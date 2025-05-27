@@ -13,6 +13,9 @@ import {
   Container,
   TextField,
   InputAdornment,
+  Grid,
+  Card,
+  CardContent,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import Layout from "./Layout";
@@ -85,7 +88,18 @@ export default function OrderHistory() {
 
   return (
     <Layout>
-      <Container maxWidth="lg">
+      <Container
+        maxWidth={false}
+        sx={{
+          maxWidth: "1400px",
+          mx: "auto",
+          py: 4,
+          px: { xs: 2, md: 4 },
+          backgroundColor: "background.paper",
+          borderRadius: 3,
+          boxShadow: 3,
+        }}
+      >
         <Box sx={{ py: 4 }}>
           <Typography
             variant="h5"

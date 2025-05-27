@@ -20,6 +20,9 @@ import {
   Fab,
   Tooltip,
   Container,
+  Grid,
+  Card,
+  CardContent,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -172,7 +175,18 @@ export default function ManageClasses() {
 
   return (
     <Layout>
-      <Container maxWidth={false} sx={{ maxWidth: "100%" }}>
+      <Container
+        maxWidth={false}
+        sx={{
+          maxWidth: "1400px",
+          mx: "auto",
+          py: 4,
+          px: { xs: 2, md: 4 },
+          backgroundColor: "background.paper",
+          borderRadius: 3,
+          boxShadow: 3,
+        }}
+      >
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
             <Typography

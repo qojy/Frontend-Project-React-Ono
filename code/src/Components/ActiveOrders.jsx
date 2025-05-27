@@ -20,6 +20,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Grid,
+  Card,
+  CardContent,
 } from "@mui/material";
 import Layout from "./Layout";
 import { format } from "date-fns";
@@ -117,115 +120,124 @@ export default function ActiveOrders() {
 
   return (
     <Layout>
-      <Container maxWidth={false} sx={{ maxWidth: "100%" }}>
-        <Box sx={{ py: 4 }}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
-            <Typography
-              variant="h5"
-              component="h2"
-              sx={{ color: "primary.main" }}
-            >
-              Active Orders
-            </Typography>
-            <Box sx={{ flexGrow: 1 }} />
-          </Box>
-
-          <TableContainer
-            component={Paper}
-            elevation={3}
-            sx={{ borderRadius: 2 }}
+      <Container
+        maxWidth={false}
+        sx={{
+          maxWidth: "1400px",
+          mx: "auto",
+          py: 4,
+          px: { xs: 2, md: 4 },
+          backgroundColor: "background.paper",
+          borderRadius: 3,
+          boxShadow: 3,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
+          <Typography
+            variant="h5"
+            component="h2"
+            sx={{ color: "primary.main" }}
           >
-            <Table>
-              <TableHead>
+            Active Orders
+          </Typography>
+          <Box sx={{ flexGrow: 1 }} />
+        </Box>
+
+        <TableContainer
+          component={Paper}
+          elevation={3}
+          sx={{ borderRadius: 2 }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 600 }}>Order ID</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Student</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Class</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Items</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Total Price</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>
+                  Prep Time (min)
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {orders.length === 0 ? (
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Order ID</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Student</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Class</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Items</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Total Price</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Prep Time (min)
+                  <TableCell colSpan={9} align="center">
+                    <Typography variant="subtitle1" sx={{ py: 3 }}>
+                      No active orders found
+                    </Typography>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {orders.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={9} align="center">
-                      <Typography variant="subtitle1" sx={{ py: 3 }}>
-                        No active orders found
-                      </Typography>
+              ) : (
+                orders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell>{order.id}</TableCell>
+                    <TableCell>{getStudentName(order.studentId)}</TableCell>
+                    <TableCell>{order.className}</TableCell>
+                    <TableCell>{getItemDetails(order.items)}</TableCell>
+                    <TableCell>₪{order.totalPrice}</TableCell>
+                    <TableCell align="right">
+                      {getTotalPrepTime(order.items)}
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(order.date), "MMM d, yyyy HH:mm")}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={order.status}
+                        color={statusColors[order.status]}
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => handleStatusChange(order)}
+                        sx={{ textTransform: "none" }}
+                      >
+                        Update Status
+                      </Button>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  orders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>{order.id}</TableCell>
-                      <TableCell>{getStudentName(order.studentId)}</TableCell>
-                      <TableCell>{order.className}</TableCell>
-                      <TableCell>{getItemDetails(order.items)}</TableCell>
-                      <TableCell>₪{order.totalPrice}</TableCell>
-                      <TableCell align="right">
-                        {getTotalPrepTime(order.items)}
-                      </TableCell>
-                      <TableCell>
-                        {format(new Date(order.date), "MMM d, yyyy HH:mm")}
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={order.status}
-                          color={statusColors[order.status]}
-                          variant="outlined"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => handleStatusChange(order)}
-                          sx={{ textTransform: "none" }}
-                        >
-                          Update Status
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-          {/* Status Update Dialog */}
-          <Dialog
-            open={statusDialogOpen}
-            onClose={() => setStatusDialogOpen(false)}
-          >
-            <DialogTitle>Update Order Status</DialogTitle>
-            <DialogContent>
-              <FormControl fullWidth sx={{ mt: 2 }}>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={newStatus}
-                  label="Status"
-                  onChange={(e) => setNewStatus(e.target.value)}
-                >
-                  <MenuItem value="preparing">Preparing</MenuItem>
-                  <MenuItem value="on the way">On the Way</MenuItem>
-                  <MenuItem value="delivered">Delivered</MenuItem>
-                </Select>
-              </FormControl>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setStatusDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleStatusUpdate} variant="contained">
-                Update
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Box>
+        {/* Status Update Dialog */}
+        <Dialog
+          open={statusDialogOpen}
+          onClose={() => setStatusDialogOpen(false)}
+        >
+          <DialogTitle>Update Order Status</DialogTitle>
+          <DialogContent>
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={newStatus}
+                label="Status"
+                onChange={(e) => setNewStatus(e.target.value)}
+              >
+                <MenuItem value="preparing">Preparing</MenuItem>
+                <MenuItem value="on the way">On the Way</MenuItem>
+                <MenuItem value="delivered">Delivered</MenuItem>
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setStatusDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleStatusUpdate} variant="contained">
+              Update
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </Layout>
   );

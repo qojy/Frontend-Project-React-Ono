@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, IconButton, useTheme, GlobalStyles } from "@mui/material";
-import CustomAppBar from "./AppBar";
 import HelpIcon from "@mui/icons-material/Help";
 import { useNavigate } from "react-router-dom";
 
@@ -15,24 +14,24 @@ export default function Layout({ children }) {
       />
       <Box
         sx={{
+          minHeight: "100vh",
+          width: "100vw",
           display: "flex",
           flexDirection: "column",
-          minHeight: "100vh",
+          alignItems: "center",
           backgroundColor: "white",
-          maxWidth: "1200px",
-          margin: "0 auto",
-          boxShadow: 3,
         }}
       >
-        <CustomAppBar />
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            p: { xs: 2, sm: 3 },
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
             mt: { xs: 7, sm: 8 },
             mb: { xs: 7, sm: 0 },
-            width: "100%",
           }}
         >
           {children}

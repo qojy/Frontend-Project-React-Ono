@@ -28,7 +28,7 @@ export default function Homepage() {
     {
       title: "View Status",
       icon: <ListAltIcon sx={{ fontSize: 40 }} />,
-      path: "/orderstatus",
+      path: "/activeorders",
     },
     {
       title: "Order History",
@@ -44,7 +44,19 @@ export default function Homepage() {
 
   return (
     <Layout>
-      <Container maxWidth={false} sx={{ maxWidth: "100%" }}>
+      <Container
+        maxWidth={false}
+        sx={{
+          maxWidth: "1400px",
+          width: "100%",
+          mx: "auto",
+          py: 4,
+          px: { xs: 2, md: 4 },
+          backgroundColor: "background.paper",
+          borderRadius: 3,
+          boxShadow: 3,
+        }}
+      >
         <Box sx={{ flexGrow: 1, p: { xs: 2, sm: 3 } }}>
           <Typography
             variant="h4"
@@ -59,22 +71,24 @@ export default function Homepage() {
           >
             Welcome to Ono Cafeteria
           </Typography>
-          <Typography variant="body1" sx={{ color: "primary.main", mb: 4 }}>
-            Manage your orders and view the menu
-          </Typography>
-          <Grid container spacing={3}>
+          <Grid
+            container
+            spacing={3}
+            justifyContent="center"
+            sx={{ textAlign: "center" }}
+          >
             {menuItems.map((item) => (
-              <Grid item xs={12} sm={6} md={3} key={item.title}>
+              <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={item.title}>
                 <Card
                   sx={{
                     height: "100%",
                     display: "flex",
                     flexDirection: "column",
                     transition: "transform 0.2s, box-shadow 0.2s",
+                    cursor: "pointer",
                     "&:hover": {
                       transform: "translateY(-4px)",
-                      boxShadow: theme.shadows[8],
-                      cursor: "pointer",
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.16)",
                     },
                   }}
                   onClick={() => navigate(item.path)}
@@ -82,11 +96,10 @@ export default function Homepage() {
                   <CardContent
                     sx={{
                       flexGrow: 1,
-                      textAlign: "center",
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      justifyContent: "center",
+                      textAlign: "center",
                       p: 3,
                     }}
                   >

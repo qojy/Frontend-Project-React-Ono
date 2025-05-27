@@ -24,6 +24,7 @@ import {
   Divider,
   Tooltip,
   Container,
+  CardMedia,
 } from "@mui/material";
 import Layout from "./Layout";
 import AddIcon from "@mui/icons-material/Add";
@@ -145,10 +146,20 @@ export default function NewOrder() {
 
   return (
     <Layout>
-      <Container maxWidth={false} sx={{ maxWidth: "100%" }}>
+      <Container
+        maxWidth={false}
+        sx={{
+          maxWidth: "1400px",
+          mx: "auto",
+          py: 4,
+          px: { xs: 2, md: 4 },
+          backgroundColor: "background.paper",
+          borderRadius: 3,
+          boxShadow: 3,
+        }}
+      >
         <Box
           sx={{
-            py: 4,
             display: "flex",
             flexDirection: "column",
             gap: 4,
@@ -249,66 +260,44 @@ export default function NewOrder() {
               }}
             >
               {menuItems.map((item) => (
-                <Grid item key={item.id}>
+                <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={item.id}>
                   <Card
                     sx={{
                       height: "100%",
                       display: "flex",
                       flexDirection: "column",
-                      position: "relative",
-                      borderRadius: 2,
-                      boxShadow: 3,
                       transition: "transform 0.2s, box-shadow 0.2s",
                       "&:hover": {
                         transform: "translateY(-4px)",
-                        boxShadow: 6,
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.16)",
                       },
                     }}
                   >
-                    {item.image ? (
-                      <Box
-                        component="img"
-                        src={item.image}
-                        alt={item.name}
-                        sx={{
-                          width: "100%",
-                          height: 200,
-                          objectFit: "cover",
-                          borderTopLeftRadius: 8,
-                          borderTopRightRadius: 8,
-                        }}
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          width: "100%",
-                          height: 200,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          bgcolor: "grey.100",
-                          borderTopLeftRadius: 8,
-                          borderTopRightRadius: 8,
-                        }}
-                      >
-                        <Typography color="text.secondary">
-                          No image available
-                        </Typography>
-                      </Box>
-                    )}
+                    <CardMedia
+                      component="img"
+                      height="240"
+                      image={
+                        item.image || "https://via.placeholder.com/400x240"
+                      }
+                      alt={item.name}
+                      sx={{ objectFit: "cover" }}
+                    />
                     <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                      <Typography
-                        variant="h5"
-                        gutterBottom
+                      <Box
                         sx={{
-                          fontWeight: 600,
-                          color: "text.primary",
-                          mb: 2,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          mb: 1,
                         }}
                       >
-                        {item.name}
-                      </Typography>
-                      <Box sx={{ mb: 2 }}>
+                        <Typography
+                          variant="h5"
+                          component="h2"
+                          sx={{ fontWeight: 700, color: "text.primary" }}
+                        >
+                          {item.name}
+                        </Typography>
                         <Typography variant="caption" color="text.secondary">
                           ID: {item.id}
                         </Typography>
