@@ -29,6 +29,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import {
+  getMenuItems,
+  addMenuItem,
+  updateMenuItem,
+  deleteMenuItem,
+} from "../firebase/menu";
 
 // Default menu items if nothing is in localStorage
 const defaultDishes = [
@@ -76,10 +82,8 @@ export default function Menu() {
     allergens: "",
     prepTime: "",
   });
-
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [dishToDelete, setDishToDelete] = useState(null);
-
   const [formErrors, setFormErrors] = useState({
     id: "",
     name: "",
@@ -87,22 +91,23 @@ export default function Menu() {
     allergens: "",
     prepTime: "",
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedDishes = localStorage.getItem("menuDishes");
-    if (savedDishes) {
-      setDishes(JSON.parse(savedDishes));
-    } else {
-      setDishes(defaultDishes);
-      localStorage.setItem("menuDishes", JSON.stringify(defaultDishes));
-    }
+    loadMenuItems();
   }, []);
 
-  useEffect(() => {
-    if (dishes.length > 0) {
-      localStorage.setItem("menuDishes", JSON.stringify(dishes));
+  const loadMenuItems = async () => {
+    setLoading(true);
+    try {
+      const loadedDishes = await getMenuItems();
+      setDishes(loadedDishes);
+    } catch (error) {
+      alert("Error loading menu items");
+    } finally {
+      setLoading(false);
     }
-  }, [dishes]);
+  };
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -144,76 +149,71 @@ export default function Menu() {
     setDeleteConfirmOpen(true);
   };
 
-  const confirmDelete = () => {
-    setDishes(dishes.filter((dish) => dish.id !== dishToDelete.id));
-    setDeleteConfirmOpen(false);
+  const confirmDelete = async () => {
+    try {
+      await deleteMenuItem(dishToDelete.id);
+      setDishes(dishes.filter((dish) => dish.id !== dishToDelete.id));
+      setDeleteConfirmOpen(false);
+    } catch (error) {
+      alert("Error deleting menu item");
+    }
   };
 
   const validateForm = () => {
     const errors = {};
-
-    // Validate ID uniqueness (only for new dishes)
     if (
       dialogMode === "add" &&
       dishes.some((dish) => dish.id === editedDish.id)
     ) {
       errors.id = "Dish ID must be unique";
     }
-
-    // Validate name (letters and spaces only)
     if (!/^[A-Za-z\s]+$/.test(editedDish.name)) {
       errors.name = "Name must contain letters only";
     }
-
-    // Validate price (positive number)
     if (!editedDish.price || parseFloat(editedDish.price) <= 0) {
       errors.price = "Price must be a positive number";
     }
-
-    // Validate allergens (comma-separated words)
     if (
       editedDish.allergens &&
       !/^[A-Za-z]+(,[A-Za-z]+)*$/.test(editedDish.allergens.replace(/\s/g, ""))
     ) {
       errors.allergens = "Allergens must be comma-separated words";
     }
-
-    // Validate prep time (positive number)
     if (!editedDish.prepTime || parseInt(editedDish.prepTime) <= 0) {
       errors.prepTime = "Preparation time must be a positive number";
     }
-
-    return errors;
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
-  const handleDialogSave = () => {
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
+  const handleDialogSave = async () => {
+    if (!validateForm()) return;
+    try {
+      if (dialogMode === "add") {
+        const newDish = {
+          ...editedDish,
+          price: Number(editedDish.price),
+          prepTime: Number(editedDish.prepTime),
+        };
+        const newId = await addMenuItem(newDish);
+        setDishes([...dishes, { ...newDish, id: newId }]);
+      } else {
+        const updatedDish = {
+          ...editedDish,
+          price: Number(editedDish.price),
+          prepTime: Number(editedDish.prepTime),
+        };
+        await updateMenuItem(selectedDish.id, updatedDish);
+        setDishes(
+          dishes.map((dish) =>
+            dish.id === selectedDish.id ? { ...updatedDish, id: dish.id } : dish
+          )
+        );
+      }
+      setOpenDialog(false);
+    } catch (error) {
+      alert("Error saving menu item");
     }
-
-    if (dialogMode === "add") {
-      const newDish = {
-        ...editedDish,
-        price: Number(editedDish.price),
-        prepTime: Number(editedDish.prepTime),
-      };
-      setDishes([...dishes, newDish]);
-    } else {
-      setDishes(
-        dishes.map((dish) =>
-          dish.id === selectedDish.id
-            ? {
-                ...editedDish,
-                price: Number(editedDish.price),
-                prepTime: Number(editedDish.prepTime),
-              }
-            : dish
-        )
-      );
-    }
-    setOpenDialog(false);
   };
 
   return (

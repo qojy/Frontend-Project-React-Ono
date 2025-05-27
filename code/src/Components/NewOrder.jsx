@@ -31,6 +31,9 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
 import HelpIcon from "@mui/icons-material/Help";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { getMenuItems } from "../firebase/menu";
+import { getClasses } from "../firebase/classes";
+import { addOrder } from "../firebase/orders";
 
 export default function NewOrder() {
   const navigate = useNavigate();
@@ -39,19 +42,27 @@ export default function NewOrder() {
   const [menuItems, setMenuItems] = useState([]);
   const [cart, setCart] = useState([]);
   const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load menu items and classes from localStorage
   useEffect(() => {
-    const savedMenu = localStorage.getItem("menuDishes");
-    if (savedMenu) {
-      setMenuItems(JSON.parse(savedMenu));
-    }
-
-    const savedClasses = localStorage.getItem("classes");
-    if (savedClasses) {
-      setClasses(JSON.parse(savedClasses));
-    }
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [loadedMenuItems, loadedClasses] = await Promise.all([
+        getMenuItems(),
+        getClasses(),
+      ]);
+      setMenuItems(loadedMenuItems);
+      setClasses(loadedClasses);
+    } catch (error) {
+      alert("Error loading menu or classes");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleQuantityChange = (itemId, change) => {
     setCart(
@@ -92,7 +103,7 @@ export default function NewOrder() {
     return Math.max(...itemPrepTimes, 0);
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!selectedClass) {
       alert("Please select a class");
       return;
@@ -105,34 +116,27 @@ export default function NewOrder() {
       alert("Please add items to your order");
       return;
     }
-
-    // Create new order object with shorter ID and complete item information
-    const newOrder = {
-      id: Math.floor(Math.random() * 10000).toString(), // Shorter ID (4 digits)
-      studentId: "1", // TODO: Replace with actual logged-in student ID
-      className: selectedClass,
-      room: classes.find((c) => c.name === selectedClass)?.room,
-      items: cart.map((item) => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-      })),
-      totalPrice: getTotalPrice(),
-      paymentMethod,
-      status: "preparing",
-      date: new Date().toISOString(),
-    };
-
-    // Get existing orders and add new one
-    const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-    const updatedOrders = [...existingOrders, newOrder];
-
-    // Save to localStorage
-    localStorage.setItem("orders", JSON.stringify(updatedOrders));
-
-    // Navigate to active orders
-    navigate("/activeorders");
+    try {
+      const newOrder = {
+        studentId: "1", // TODO: Replace with actual logged-in student ID
+        className: selectedClass,
+        room: classes.find((c) => c.name === selectedClass)?.room,
+        items: cart.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        totalPrice: getTotalPrice(),
+        paymentMethod,
+        status: "preparing",
+        date: new Date().toISOString(),
+      };
+      await addOrder(newOrder);
+      navigate("/activeorders");
+    } catch (error) {
+      alert("Error placing order");
+    }
   };
 
   const removeFromCart = (itemId) => {

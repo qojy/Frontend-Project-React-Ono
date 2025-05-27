@@ -17,35 +17,44 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import Layout from "./Layout";
 import { format } from "date-fns";
+import { getOrdersByStatus } from "../firebase/orders";
+import { getMenuItems } from "../firebase/menu";
+import { getStudents } from "../firebase/students";
 
 export default function OrderHistory() {
   const [orders, setOrders] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [students, setStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load orders, menu items, and students from localStorage
-    const loadedOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-    const loadedMenuItems = JSON.parse(
-      localStorage.getItem("menuDishes") || "[]"
-    );
-    const loadedStudents = JSON.parse(localStorage.getItem("students") || "[]");
-
-    // Filter only delivered orders
-    const deliveredOrders = loadedOrders.filter(
-      (order) => order.status === "delivered"
-    );
-
-    setOrders(deliveredOrders);
-    setMenuItems(loadedMenuItems);
-    setStudents(loadedStudents);
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [deliveredOrders, loadedMenuItems, loadedStudents] =
+        await Promise.all([
+          getOrdersByStatus("delivered"),
+          getMenuItems(),
+          getStudents(),
+        ]);
+      setOrders(deliveredOrders);
+      setMenuItems(loadedMenuItems);
+      setStudents(loadedStudents);
+    } catch (error) {
+      alert("Error loading order history");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStudentName = (studentId) => {
     const student = students.find((s) => s.id === studentId);
     return student
-      ? `${student.firstName} ${student.lastName}`
+      ? student.fullName || `${student.firstName} ${student.lastName}`
       : "Unknown Student";
   };
 
@@ -66,7 +75,6 @@ export default function OrderHistory() {
     const items = getItemDetails(order.items).toLowerCase();
     const orderId = order.id.toLowerCase();
     const className = order.className.toLowerCase();
-
     return (
       studentName.includes(searchLower) ||
       items.includes(searchLower) ||

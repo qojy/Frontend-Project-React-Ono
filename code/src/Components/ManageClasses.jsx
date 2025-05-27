@@ -24,6 +24,13 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import {
+  getClasses,
+  addClass,
+  updateClass,
+  deleteClass,
+  checkClassNameExists,
+} from "../firebase/classes";
 
 export default function ManageClasses() {
   const [classes, setClasses] = useState([]);
@@ -36,22 +43,28 @@ export default function ManageClasses() {
     floor: "",
     roomNumber: "",
   });
-
   const [formErrors, setFormErrors] = useState({
     name: "",
     building: "",
     floor: "",
     roomNumber: "",
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedClasses = JSON.parse(localStorage.getItem("classes")) || [];
-    setClasses(storedClasses);
+    loadClasses();
   }, []);
 
-  const saveToLocalStorage = (updatedClasses) => {
-    localStorage.setItem("classes", JSON.stringify(updatedClasses));
-    setClasses(updatedClasses);
+  const loadClasses = async () => {
+    setLoading(true);
+    try {
+      const loadedClasses = await getClasses();
+      setClasses(loadedClasses);
+    } catch (error) {
+      alert("Error loading classes");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOpenDialog = (classData = null) => {
@@ -98,74 +111,63 @@ export default function ManageClasses() {
 
   const validateForm = () => {
     const errors = {};
-
-    // Validate building (letters only)
+    if (!formData.name.trim()) {
+      errors.name = "Class name is required";
+    }
     if (!/^[A-Za-z]+$/.test(formData.building)) {
       errors.building = "Building name must contain letters only";
     }
-
-    // Validate floor (numbers only)
-    if (!/^\d+$/.test(formData.floor)) {
+    if (!/^[0-9]+$/.test(formData.floor)) {
       errors.floor = "Floor must be a number";
     }
-
-    // Validate room number (positive number)
     if (
-      !/^\d+$/.test(formData.roomNumber) ||
+      !/^[0-9]+$/.test(formData.roomNumber) ||
       parseInt(formData.roomNumber) <= 0
     ) {
       errors.roomNumber = "Room number must be a positive number";
     }
-
-    return errors;
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = () => {
-    if (
-      !formData.name ||
-      !formData.building ||
-      !formData.floor ||
-      !formData.roomNumber
-    ) {
-      alert("Please fill in all fields");
-      return;
-    }
-
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-
-    const fullRoomId = `${formData.building}-${formData.floor}-${formData.roomNumber}`;
-    const classData = {
-      name: formData.name,
-      room: fullRoomId,
-    };
-
-    let updatedClasses;
-    if (selectedClass) {
-      // Edit existing class
-      updatedClasses = classes.map((c) =>
-        c.name === selectedClass.name ? classData : c
-      );
-    } else {
-      // Add new class
-      if (classes.some((c) => c.name === formData.name)) {
-        alert("A class with this name already exists");
-        return;
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+    try {
+      const fullRoomId = `${formData.building}-${formData.floor}-${formData.roomNumber}`;
+      const classData = {
+        name: formData.name,
+        room: fullRoomId,
+      };
+      if (selectedClass) {
+        await updateClass(selectedClass.id, classData);
+        setClasses(
+          classes.map((c) =>
+            c.id === selectedClass.id ? { ...classData, id: c.id } : c
+          )
+        );
+      } else {
+        const exists = await checkClassNameExists(formData.name);
+        if (exists) {
+          alert("A class with this name already exists");
+          return;
+        }
+        const newId = await addClass(classData);
+        setClasses([...classes, { ...classData, id: newId }]);
       }
-      updatedClasses = [...classes, classData];
+      handleCloseDialog();
+    } catch (error) {
+      alert("Error saving class");
     }
-
-    saveToLocalStorage(updatedClasses);
-    handleCloseDialog();
   };
 
-  const handleDelete = () => {
-    const updatedClasses = classes.filter((c) => c.name !== selectedClass.name);
-    saveToLocalStorage(updatedClasses);
-    handleCloseDeleteDialog();
+  const handleDelete = async () => {
+    try {
+      await deleteClass(selectedClass.id);
+      setClasses(classes.filter((c) => c.id !== selectedClass.id));
+      handleCloseDeleteDialog();
+    } catch (error) {
+      alert("Error deleting class");
+    }
   };
 
   return (

@@ -23,6 +23,9 @@ import {
 } from "@mui/material";
 import Layout from "./Layout";
 import { format } from "date-fns";
+import { getOrdersByStatus, updateOrder } from "../firebase/orders";
+import { getMenuItems } from "../firebase/menu";
+import { getStudents } from "../firebase/students";
 
 export default function ActiveOrders() {
   const [orders, setOrders] = useState([]);
@@ -31,6 +34,7 @@ export default function ActiveOrders() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [newStatus, setNewStatus] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const statusColors = {
     preparing: "warning",
@@ -39,27 +43,29 @@ export default function ActiveOrders() {
   };
 
   useEffect(() => {
-    // Load orders, menu items, and students from localStorage
-    const loadedOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-    const loadedMenuItems = JSON.parse(
-      localStorage.getItem("menuDishes") || "[]"
-    );
-    const loadedStudents = JSON.parse(localStorage.getItem("students") || "[]");
-
-    // Filter out delivered orders
-    const activeOrders = loadedOrders.filter(
-      (order) => order.status !== "delivered"
-    );
-
-    setOrders(activeOrders);
-    setMenuItems(loadedMenuItems);
-    setStudents(loadedStudents);
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [activeOrders, loadedMenuItems, loadedStudents] = await Promise.all(
+        [getOrdersByStatus("preparing"), getMenuItems(), getStudents()]
+      );
+      setOrders(activeOrders);
+      setMenuItems(loadedMenuItems);
+      setStudents(loadedStudents);
+    } catch (error) {
+      alert("Error loading active orders");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStudentName = (studentId) => {
     const student = students.find((s) => s.id === studentId);
     return student
-      ? `${student.firstName} ${student.lastName}`
+      ? student.fullName || `${student.firstName} ${student.lastName}`
       : "Unknown Student";
   };
 
@@ -75,12 +81,10 @@ export default function ActiveOrders() {
   };
 
   const getTotalPrepTime = (items) => {
-    // Calculate prep time for each item considering quantity
     const itemPrepTimes = items.map((item) => {
       const menuItem = menuItems.find((m) => m.id === item.id);
       return menuItem ? menuItem.prepTime * item.quantity : 0;
     });
-    // Return the maximum prep time
     return Math.max(...itemPrepTimes, 0);
   };
 
@@ -90,25 +94,25 @@ export default function ActiveOrders() {
     setStatusDialogOpen(true);
   };
 
-  const handleStatusUpdate = () => {
-    const allOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-
-    // Update the order status
-    const updatedOrders = allOrders.map((order) =>
-      order.id === selectedOrder.id ? { ...order, status: newStatus } : order
-    );
-
-    // Save back to localStorage
-    localStorage.setItem("orders", JSON.stringify(updatedOrders));
-
-    // Update the active orders list (filtering out delivered orders)
-    const activeOrders = updatedOrders.filter(
-      (order) => order.status !== "delivered"
-    );
-    setOrders(activeOrders);
-
-    setStatusDialogOpen(false);
-    setSelectedOrder(null);
+  const handleStatusUpdate = async () => {
+    try {
+      await updateOrder(selectedOrder.id, { status: newStatus });
+      if (newStatus === "delivered") {
+        setOrders(orders.filter((order) => order.id !== selectedOrder.id));
+      } else {
+        setOrders(
+          orders.map((order) =>
+            order.id === selectedOrder.id
+              ? { ...order, status: newStatus }
+              : order
+          )
+        );
+      }
+      setStatusDialogOpen(false);
+      setSelectedOrder(null);
+    } catch (error) {
+      alert("Error updating order status");
+    }
   };
 
   return (
