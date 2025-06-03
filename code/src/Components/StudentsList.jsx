@@ -34,6 +34,7 @@ import {
   deleteStudent,
   checkStudentIdExists,
 } from "../firebase/students";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function StudentsList() {
   const [students, setStudents] = useState([]);
@@ -141,7 +142,16 @@ export default function StudentsList() {
     return (
       <Layout>
         <Container>
-          <Typography>Loading students...</Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 200,
+            }}
+          >
+            <CircularProgress color="primary" size={60} />
+          </Box>
         </Container>
       </Layout>
     );
@@ -161,114 +171,120 @@ export default function StudentsList() {
           boxShadow: 3,
         }}
       >
-        <Box sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
-            <Typography
-              variant="h5"
-              component="h2"
-              sx={{ color: "primary.main" }}
-            >
-              Students List
-            </Typography>
-            <Box sx={{ flexGrow: 1 }} />
-            <Tooltip title="Add New Student">
-              <Fab color="primary" onClick={() => handleOpenDialog()}>
-                <AddIcon />
-              </Fab>
-            </Tooltip>
-          </Box>
+        {!loading && (
+          <Box sx={{ p: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{ color: "primary.main" }}
+              >
+                Students List
+              </Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Tooltip title="Add New Student">
+                <Fab color="primary" onClick={() => handleOpenDialog()}>
+                  <AddIcon />
+                </Fab>
+              </Tooltip>
+            </Box>
 
-          <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Full Name</TableCell>
-                  <TableCell>ID</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {students.map((student) => (
-                  <TableRow key={student.id}>
-                    <TableCell>{student.fullName}</TableCell>
-                    <TableCell>{student.id}</TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleOpenDialog(student)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        onClick={() => handleOpenDeleteDialog(student)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {students.length === 0 && (
+            <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+              <Table>
+                <TableHead>
                   <TableRow>
-                    <TableCell colSpan={3} align="center">
-                      No students found. Add a new student to get started.
-                    </TableCell>
+                    <TableCell>Full Name</TableCell>
+                    <TableCell>ID</TableCell>
+                    <TableCell align="right">Actions</TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {students.map((student) => (
+                    <TableRow key={student.id}>
+                      <TableCell>{student.fullName}</TableCell>
+                      <TableCell>{student.id}</TableCell>
+                      <TableCell align="right">
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleOpenDialog(student)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={() => handleOpenDeleteDialog(student)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {students.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={3} align="center">
+                        No students found. Add a new student to get started.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
 
-          {/* Add/Edit Dialog */}
-          <Dialog open={openDialog} onClose={handleCloseDialog}>
-            <DialogTitle>
-              {selectedStudent ? "Edit Student" : "Add New Student"}
-            </DialogTitle>
-            <DialogContent>
-              <TextField
-                autoFocus
-                margin="dense"
-                name="fullName"
-                label="Full Name"
-                type="text"
-                fullWidth
-                value={formData.fullName}
-                onChange={handleInputChange}
-              />
-              <TextField
-                margin="dense"
-                name="id"
-                label="Student ID"
-                type="text"
-                fullWidth
-                value={formData.id}
-                onChange={handleInputChange}
-                disabled={!!selectedStudent}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseDialog}>Cancel</Button>
-              <Button onClick={handleSubmit} variant="contained">
-                {selectedStudent ? "Save Changes" : "Add Student"}
-              </Button>
-            </DialogActions>
-          </Dialog>
+            {/* Add/Edit Dialog */}
+            <Dialog open={openDialog} onClose={handleCloseDialog}>
+              <DialogTitle>
+                {selectedStudent ? "Edit Student" : "Add New Student"}
+              </DialogTitle>
+              <DialogContent>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  name="fullName"
+                  label="Full Name"
+                  type="text"
+                  fullWidth
+                  value={formData.fullName}
+                  onChange={handleInputChange}
+                />
+                <TextField
+                  margin="dense"
+                  name="id"
+                  label="Student ID"
+                  type="text"
+                  fullWidth
+                  value={formData.id}
+                  onChange={handleInputChange}
+                  disabled={!!selectedStudent}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseDialog}>Cancel</Button>
+                <Button onClick={handleSubmit} variant="contained">
+                  {selectedStudent ? "Save Changes" : "Add Student"}
+                </Button>
+              </DialogActions>
+            </Dialog>
 
-          {/* Delete Confirmation Dialog */}
-          <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogContent>
-              Are you sure you want to delete {selectedStudent?.fullName}? This
-              action cannot be undone.
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
-              <Button onClick={handleDelete} color="error" variant="contained">
-                Delete
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Box>
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+              <DialogTitle>Confirm Deletion</DialogTitle>
+              <DialogContent>
+                Are you sure you want to delete {selectedStudent?.fullName}?
+                This action cannot be undone.
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+                <Button
+                  onClick={handleDelete}
+                  color="error"
+                  variant="contained"
+                >
+                  Delete
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </Box>
+        )}
       </Container>
     </Layout>
   );

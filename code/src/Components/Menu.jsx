@@ -42,6 +42,7 @@ import {
 import MenuTable from "./MenuTable";
 import MenuDialog from "./MenuDialog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
+import CircularProgress from "@mui/material/CircularProgress";
 
 // Default menu items if nothing is in localStorage
 const defaultDishes = [
@@ -237,49 +238,63 @@ export default function Menu() {
           boxShadow: 3,
         }}
       >
-        <Box sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
-            <IconButton onClick={() => navigate("/")} sx={{ mr: 2 }}>
-              <ArrowBackIcon />
-            </IconButton>
-            <Typography
-              variant="h5"
-              component="h2"
-              sx={{ color: "primary.main" }}
-            >
-              Menu
-            </Typography>
-            <Box sx={{ flexGrow: 1 }} />
-            <Tooltip title="Add New Dish">
-              <Fab color="primary" onClick={handleAddNew}>
-                <AddIcon />
-              </Fab>
-            </Tooltip>
+        {loading && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 200,
+            }}
+          >
+            <CircularProgress color="primary" size={60} />
           </Box>
+        )}
+        {!loading && (
+          <Box sx={{ p: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
+              <IconButton onClick={() => navigate("/")} sx={{ mr: 2 }}>
+                <ArrowBackIcon />
+              </IconButton>
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{ color: "primary.main" }}
+              >
+                Menu
+              </Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Tooltip title="Add New Dish">
+                <Fab color="primary" onClick={handleAddNew}>
+                  <AddIcon />
+                </Fab>
+              </Tooltip>
+            </Box>
 
-          <MenuTable
-            dishes={dishes}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+            <MenuTable
+              dishes={dishes}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
 
-          <MenuDialog
-            open={openDialog}
-            dialogMode={dialogMode}
-            editedDish={editedDish}
-            setEditedDish={setEditedDish}
-            formErrors={formErrors}
-            handleDialogSave={handleDialogSave}
-            setOpenDialog={setOpenDialog}
-          />
+            <MenuDialog
+              open={openDialog}
+              dialogMode={dialogMode}
+              editedDish={editedDish}
+              setEditedDish={setEditedDish}
+              formErrors={formErrors}
+              handleDialogSave={handleDialogSave}
+              setOpenDialog={setOpenDialog}
+            />
 
-          <DeleteConfirmDialog
-            open={deleteConfirmOpen}
-            dishToDelete={dishToDelete}
-            onClose={() => setDeleteConfirmOpen(false)}
-            onConfirm={confirmDelete}
-          />
-        </Box>
+            <DeleteConfirmDialog
+              open={deleteConfirmOpen}
+              dishToDelete={dishToDelete}
+              onClose={() => setDeleteConfirmOpen(false)}
+              onConfirm={confirmDelete}
+            />
+          </Box>
+        )}
       </Container>
     </Layout>
   );

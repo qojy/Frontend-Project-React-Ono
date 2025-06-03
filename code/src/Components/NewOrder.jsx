@@ -25,6 +25,7 @@ import {
   Tooltip,
   Container,
   CardMedia,
+  CircularProgress,
 } from "@mui/material";
 import Layout from "./Layout";
 import AddIcon from "@mui/icons-material/Add";
@@ -160,94 +161,110 @@ export default function NewOrder() {
           boxShadow: 3,
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-            minHeight: "calc(100vh - 64px)",
-            width: "100%",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
-            <Typography
-              variant="h5"
-              component="h2"
-              sx={{ color: "primary.main" }}
-            >
-              New Order
-            </Typography>
-            <Box sx={{ flexGrow: 1 }} />
-          </Box>
-
-          {/* Order Details Section */}
-          <Paper
-            elevation={3}
+        {loading && (
+          <Box
             sx={{
-              p: 3,
-              mb: 4,
-              borderRadius: 2,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 200,
             }}
           >
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="class-select-label">Select Class</InputLabel>
-                  <Select
-                    labelId="class-select-label"
-                    id="class-select"
-                    value={selectedClass}
-                    label="Select Class"
-                    onChange={(e) => setSelectedClass(e.target.value)}
-                  >
-                    {classes.map((classItem) => (
-                      <MenuItem key={classItem.name} value={classItem.name}>
-                        {classItem.name} - Room {classItem.room}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+            <CircularProgress color="primary" size={60} />
+          </Box>
+        )}
+        {!loading && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+              minHeight: "calc(100vh - 64px)",
+              width: "100%",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{ color: "primary.main" }}
+              >
+                New Order
+              </Typography>
+              <Box sx={{ flexGrow: 1 }} />
+            </Box>
+
+            {/* Order Details Section */}
+            <Paper
+              elevation={3}
+              sx={{
+                p: 3,
+                mb: 4,
+                borderRadius: 2,
+              }}
+            >
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="class-select-label">
+                      Select Class
+                    </InputLabel>
+                    <Select
+                      labelId="class-select-label"
+                      id="class-select"
+                      value={selectedClass}
+                      label="Select Class"
+                      onChange={(e) => setSelectedClass(e.target.value)}
+                    >
+                      {classes.map((classItem) => (
+                        <MenuItem key={classItem.name} value={classItem.name}>
+                          {classItem.name} - Room {classItem.room}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="payment-method-label">
+                      Payment Method
+                    </InputLabel>
+                    <Select
+                      labelId="payment-method-label"
+                      id="payment-method"
+                      value={paymentMethod}
+                      label="Payment Method"
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                    >
+                      <MenuItem value="cash">Cash</MenuItem>
+                      <MenuItem value="credit">Credit Card</MenuItem>
+                      <MenuItem value="bit">Bit</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="payment-method-label">
-                    Payment Method
-                  </InputLabel>
-                  <Select
-                    labelId="payment-method-label"
-                    id="payment-method"
-                    value={paymentMethod}
-                    label="Payment Method"
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  >
-                    <MenuItem value="cash">Cash</MenuItem>
-                    <MenuItem value="credit">Credit Card</MenuItem>
-                    <MenuItem value="bit">Bit</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </Paper>
+            </Paper>
 
-          {/* Menu Items Grid */}
-          <MenuItemsGrid
-            menuItems={menuItems}
-            cart={cart}
-            onAddToCart={handleAddToCart}
-            onRemoveFromCart={removeFromCart}
-          />
+            {/* Menu Items Grid */}
+            <MenuItemsGrid
+              menuItems={menuItems}
+              cart={cart}
+              onAddToCart={handleAddToCart}
+              onRemoveFromCart={removeFromCart}
+            />
 
-          {/* Cart Section */}
-          <CartSummary
-            cart={cart}
-            getTotalPrice={getTotalPrice}
-            getTotalPrepTime={getTotalPrepTime}
-            onRemoveFromCart={removeFromCart}
-            handlePlaceOrder={handlePlaceOrder}
-          />
+            {/* Cart Section */}
+            <CartSummary
+              cart={cart}
+              getTotalPrice={getTotalPrice}
+              getTotalPrepTime={getTotalPrepTime}
+              onRemoveFromCart={removeFromCart}
+              handlePlaceOrder={handlePlaceOrder}
+            />
 
-          <Box sx={{ flexGrow: 1 }} />
-        </Box>
+            <Box sx={{ flexGrow: 1 }} />
+          </Box>
+        )}
       </Container>
     </Layout>
   );

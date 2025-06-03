@@ -37,6 +37,7 @@ import {
 import ClassesTable from "./ClassesTable";
 import ClassDialog from "./ClassDialog";
 import DeleteClassDialog from "./DeleteClassDialog";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function ManageClasses() {
   const [classes, setClasses] = useState([]);
@@ -190,46 +191,60 @@ export default function ManageClasses() {
           boxShadow: 3,
         }}
       >
-        <Box sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
-            <Typography
-              variant="h5"
-              component="h2"
-              sx={{ color: "primary.main" }}
-            >
-              Manage Classes
-            </Typography>
-            <Box sx={{ flexGrow: 1 }} />
-            <Tooltip title="Add New Class">
-              <Fab color="primary" onClick={() => handleOpenDialog()}>
-                <AddIcon />
-              </Fab>
-            </Tooltip>
+        {loading && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 200,
+            }}
+          >
+            <CircularProgress color="primary" size={60} />
           </Box>
+        )}
+        {!loading && (
+          <Box sx={{ p: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 3 }}>
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{ color: "primary.main" }}
+              >
+                Manage Classes
+              </Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Tooltip title="Add New Class">
+                <Fab color="primary" onClick={() => handleOpenDialog()}>
+                  <AddIcon />
+                </Fab>
+              </Tooltip>
+            </Box>
 
-          <ClassesTable
-            classes={classes}
-            onEdit={handleOpenDialog}
-            onDelete={handleOpenDeleteDialog}
-          />
+            <ClassesTable
+              classes={classes}
+              onEdit={handleOpenDialog}
+              onDelete={handleOpenDeleteDialog}
+            />
 
-          <ClassDialog
-            open={openDialog}
-            selectedClass={selectedClass}
-            formData={formData}
-            setFormData={setFormData}
-            formErrors={formErrors}
-            onClose={handleCloseDialog}
-            onSubmit={handleSubmit}
-          />
+            <ClassDialog
+              open={openDialog}
+              selectedClass={selectedClass}
+              formData={formData}
+              setFormData={setFormData}
+              formErrors={formErrors}
+              onClose={handleCloseDialog}
+              onSubmit={handleSubmit}
+            />
 
-          <DeleteClassDialog
-            open={openDeleteDialog}
-            selectedClass={selectedClass}
-            onClose={handleCloseDeleteDialog}
-            onConfirm={handleDelete}
-          />
-        </Box>
+            <DeleteClassDialog
+              open={openDeleteDialog}
+              selectedClass={selectedClass}
+              onClose={handleCloseDeleteDialog}
+              onConfirm={handleDelete}
+            />
+          </Box>
+        )}
       </Container>
     </Layout>
   );
