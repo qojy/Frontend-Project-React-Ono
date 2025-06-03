@@ -34,6 +34,9 @@ import {
   deleteClass,
   checkClassNameExists,
 } from "../firebase/classes";
+import ClassesTable from "./ClassesTable";
+import ClassDialog from "./ClassDialog";
+import DeleteClassDialog from "./DeleteClassDialog";
 
 export default function ManageClasses() {
   const [classes, setClasses] = useState([]);
@@ -204,120 +207,28 @@ export default function ManageClasses() {
             </Tooltip>
           </Box>
 
-          <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Class Name</TableCell>
-                  <TableCell>Room</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {classes.map((classItem) => (
-                  <TableRow key={classItem.name}>
-                    <TableCell>{classItem.name}</TableCell>
-                    <TableCell>{classItem.room}</TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleOpenDialog(classItem)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        onClick={() => handleOpenDeleteDialog(classItem)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {classes.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={3} align="center">
-                      No classes found. Add a new class to get started.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <ClassesTable
+            classes={classes}
+            onEdit={handleOpenDialog}
+            onDelete={handleOpenDeleteDialog}
+          />
 
-          {/* Add/Edit Dialog */}
-          <Dialog open={openDialog} onClose={handleCloseDialog}>
-            <DialogTitle>
-              {selectedClass ? "Edit Class" : "Add New Class"}
-            </DialogTitle>
-            <DialogContent>
-              <TextField
-                autoFocus
-                margin="dense"
-                name="name"
-                label="Class Name"
-                type="text"
-                fullWidth
-                value={formData.name}
-                onChange={handleInputChange}
-                disabled={!!selectedClass}
-              />
-              <TextField
-                margin="dense"
-                name="building"
-                label="Building Name (letters only)"
-                type="text"
-                fullWidth
-                value={formData.building}
-                onChange={handleInputChange}
-                error={!!formErrors.building}
-                helperText={formErrors.building}
-              />
-              <TextField
-                margin="dense"
-                name="floor"
-                label="Floor Number"
-                type="text"
-                fullWidth
-                value={formData.floor}
-                onChange={handleInputChange}
-                error={!!formErrors.floor}
-                helperText={formErrors.floor}
-              />
-              <TextField
-                margin="dense"
-                name="roomNumber"
-                label="Room Number"
-                type="text"
-                fullWidth
-                value={formData.roomNumber}
-                onChange={handleInputChange}
-                error={!!formErrors.roomNumber}
-                helperText={formErrors.roomNumber}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseDialog}>Cancel</Button>
-              <Button onClick={handleSubmit} variant="contained">
-                {selectedClass ? "Save Changes" : "Add Class"}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <ClassDialog
+            open={openDialog}
+            selectedClass={selectedClass}
+            formData={formData}
+            setFormData={setFormData}
+            formErrors={formErrors}
+            onClose={handleCloseDialog}
+            onSubmit={handleSubmit}
+          />
 
-          {/* Delete Confirmation Dialog */}
-          <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogContent>
-              Are you sure you want to delete {selectedClass?.name}? This action
-              cannot be undone.
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
-              <Button onClick={handleDelete} color="error" variant="contained">
-                Delete
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <DeleteClassDialog
+            open={openDeleteDialog}
+            selectedClass={selectedClass}
+            onClose={handleCloseDeleteDialog}
+            onConfirm={handleDelete}
+          />
         </Box>
       </Container>
     </Layout>
