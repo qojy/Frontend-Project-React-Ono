@@ -198,7 +198,12 @@ export default function OrderHistory() {
                           variant="contained"
                           color="secondary"
                           size="small"
-                          onClick={() => handleOpenDetails(order)}
+                          onClick={() =>
+                            window.open(
+                              `/order/${order._id || order.id}`,
+                              "_blank"
+                            )
+                          }
                           sx={{
                             textTransform: "none",
                             fontWeight: 600,

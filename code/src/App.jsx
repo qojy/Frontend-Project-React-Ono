@@ -12,6 +12,7 @@ import Help from "./Components/Help";
 import ManageClasses from "./Components/ManageClasses";
 import StudentsList from "./Components/StudentsList";
 import NavBar from "./Components/NavBar";
+import OrderDetailsPage from "./Components/OrderDetailsPage";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/help" element={<Help />} />
         <Route path="/manageclasses" element={<ManageClasses />} />
         <Route path="/studentslist" element={<StudentsList />} />
+        <Route path="/order/:orderId" element={<OrderDetailsPage />} />
       </Routes>
     </Box>
   );
