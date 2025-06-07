@@ -8,16 +8,29 @@ import {
   Typography,
   useTheme,
   Container,
+  Button,
+  Snackbar,
 } from "@mui/material";
 import Layout from "./Layout";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import HistoryIcon from "@mui/icons-material/History";
 import HelpIcon from "@mui/icons-material/Help";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import StudentDashboard from "./StudentDashboard";
+import AdminDashboard from "./AdminDashboard";
+import MuiAlert from "@mui/material/Alert";
+import { seedFirestore, resetFirestore } from "../firebase/seed";
 
 export default function Homepage() {
   const navigate = useNavigate();
   const theme = useTheme();
+  const [snackbar, setSnackbar] = React.useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const menuItems = [
     {
@@ -42,6 +55,40 @@ export default function Homepage() {
     },
   ];
 
+  const handleSeed = async () => {
+    try {
+      await seedFirestore();
+      setSnackbar({
+        open: true,
+        message: "Firestore seeded successfully!",
+        severity: "success",
+      });
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: "Error seeding Firestore",
+        severity: "error",
+      });
+    }
+  };
+
+  const handleReset = async () => {
+    try {
+      await resetFirestore();
+      setSnackbar({
+        open: true,
+        message: "Firestore reset successfully!",
+        severity: "success",
+      });
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: "Error resetting Firestore",
+        severity: "error",
+      });
+    }
+  };
+
   return (
     <Layout>
       <Container
@@ -57,6 +104,28 @@ export default function Homepage() {
           boxShadow: 3,
         }}
       >
+        {/* Seed Firestore Button (only in development) */}
+        {process.env.NODE_ENV === "development" && (
+          <Box
+            sx={{ mb: 2, display: "flex", justifyContent: "center", gap: 2 }}
+          >
+            <Button variant="contained" color="secondary" onClick={handleSeed}>
+              Seed Firestore with Sample Data
+            </Button>
+            <Button variant="outlined" color="error" onClick={handleReset}>
+              Reset Firestore Data
+            </Button>
+          </Box>
+        )}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
+          <MuiAlert elevation={6} variant="filled" severity={snackbar.severity}>
+            {snackbar.message}
+          </MuiAlert>
+        </Snackbar>
         <Box sx={{ flexGrow: 1, p: { xs: 2, sm: 3 } }}>
           <Typography
             variant="h4"
@@ -127,6 +196,34 @@ export default function Homepage() {
             ))}
           </Grid>
         </Box>
+        {/* Student Dashboard Section */}
+        <Typography
+          variant="h5"
+          sx={{
+            mt: 8,
+            mb: 3,
+            fontWeight: 600,
+            color: "primary.main",
+            textAlign: "center",
+          }}
+        >
+          Student Dashboard
+        </Typography>
+        <StudentDashboard />
+        {/* Admin Dashboard Section */}
+        <Typography
+          variant="h5"
+          sx={{
+            mt: 8,
+            mb: 3,
+            fontWeight: 600,
+            color: "primary.main",
+            textAlign: "center",
+          }}
+        >
+          Admin Dashboard
+        </Typography>
+        <AdminDashboard />
       </Container>
     </Layout>
   );

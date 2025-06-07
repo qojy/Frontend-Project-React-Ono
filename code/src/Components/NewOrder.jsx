@@ -38,14 +38,17 @@ import { getClasses } from "../firebase/classes";
 import { addOrder } from "../firebase/orders";
 import MenuItemsGrid from "./MenuItemsGrid";
 import CartSummary from "./CartSummary";
+import { getStudents } from "../firebase/students";
 
 export default function NewOrder() {
   const navigate = useNavigate();
+  const [selectedStudent, setSelectedStudent] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [menuItems, setMenuItems] = useState([]);
   const [cart, setCart] = useState([]);
   const [classes, setClasses] = useState([]);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,14 +58,13 @@ export default function NewOrder() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedMenuItems, loadedClasses] = await Promise.all([
-        getMenuItems(),
-        getClasses(),
-      ]);
+      const [loadedMenuItems, loadedClasses, loadedStudents] =
+        await Promise.all([getMenuItems(), getClasses(), getStudents()]);
       setMenuItems(loadedMenuItems);
       setClasses(loadedClasses);
+      setStudents(loadedStudents);
     } catch (error) {
-      alert("Error loading menu or classes");
+      alert("Error loading menu, classes, or students");
     } finally {
       setLoading(false);
     }
@@ -108,6 +110,10 @@ export default function NewOrder() {
   };
 
   const handlePlaceOrder = async () => {
+    if (!selectedStudent) {
+      alert("Please select a student");
+      return;
+    }
     if (!selectedClass) {
       alert("Please select a class");
       return;
@@ -122,7 +128,8 @@ export default function NewOrder() {
     }
     try {
       const newOrder = {
-        studentId: "1", // TODO: Replace with actual logged-in student ID
+        student: students.find((s) => s.id === selectedStudent)?.fullName || "",
+        studentId: selectedStudent,
         className: selectedClass,
         room: classes.find((c) => c.name === selectedClass)?.room,
         items: cart.map((item) => ({
@@ -204,7 +211,27 @@ export default function NewOrder() {
               }}
             >
               <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth required>
+                    <InputLabel id="student-select-label">
+                      Select Student
+                    </InputLabel>
+                    <Select
+                      labelId="student-select-label"
+                      id="student-select"
+                      value={selectedStudent}
+                      label="Select Student"
+                      onChange={(e) => setSelectedStudent(e.target.value)}
+                    >
+                      {students.map((student) => (
+                        <MenuItem key={student.id} value={student.id}>
+                          {student.fullName} ({student.id})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={4}>
                   <FormControl fullWidth>
                     <InputLabel id="class-select-label">
                       Select Class
@@ -224,7 +251,7 @@ export default function NewOrder() {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={4}>
                   <FormControl fullWidth>
                     <InputLabel id="payment-method-label">
                       Payment Method

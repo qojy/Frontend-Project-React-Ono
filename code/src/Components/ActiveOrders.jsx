@@ -23,18 +23,25 @@ import {
   Grid,
   Card,
   CardContent,
+  Modal,
 } from "@mui/material";
 import Layout from "./Layout";
 import { format } from "date-fns";
 import { getOrdersByStatus, updateOrder } from "../firebase/orders";
 import { getMenuItems } from "../firebase/menu";
 import { getStudents } from "../firebase/students";
+import PersonIcon from "@mui/icons-material/Person";
+import ClassIcon from "@mui/icons-material/Class";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 
 export default function ActiveOrders() {
   const [orders, setOrders] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [students, setStudents] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrderForStatus, setSelectedOrderForStatus] = useState(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [newStatus, setNewStatus] = useState("");
   const [loading, setLoading] = useState(true);
@@ -92,30 +99,40 @@ export default function ActiveOrders() {
   };
 
   const handleStatusChange = (order) => {
-    setSelectedOrder(order);
+    setSelectedOrderForStatus(order);
     setNewStatus(order.status);
     setStatusDialogOpen(true);
   };
 
   const handleStatusUpdate = async () => {
     try {
-      await updateOrder(selectedOrder.id, { status: newStatus });
+      await updateOrder(selectedOrderForStatus.id, { status: newStatus });
       if (newStatus === "delivered") {
-        setOrders(orders.filter((order) => order.id !== selectedOrder.id));
+        setOrders(
+          orders.filter((order) => order.id !== selectedOrderForStatus.id)
+        );
       } else {
         setOrders(
           orders.map((order) =>
-            order.id === selectedOrder.id
+            order.id === selectedOrderForStatus.id
               ? { ...order, status: newStatus }
               : order
           )
         );
       }
       setStatusDialogOpen(false);
-      setSelectedOrder(null);
+      setSelectedOrderForStatus(null);
     } catch (error) {
       alert("Error updating order status");
     }
+  };
+
+  const handleOpenDetails = (order) => {
+    setSelectedOrder(order);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedOrder(null);
   };
 
   return (
@@ -190,19 +207,45 @@ export default function ActiveOrders() {
                     <TableCell>
                       <Chip
                         label={order.status}
-                        color={statusColors[order.status]}
-                        variant="outlined"
+                        color={statusColors[order.status] || "default"}
+                        size="small"
                       />
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() => handleStatusChange(order)}
-                        sx={{ textTransform: "none" }}
-                      >
-                        Update Status
-                      </Button>
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => handleStatusChange(order)}
+                          sx={{
+                            textTransform: "none",
+                            fontWeight: 600,
+                            boxShadow: 2,
+                            "&:hover": {
+                              boxShadow: 4,
+                            },
+                          }}
+                        >
+                          Change Status
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          size="small"
+                          onClick={() => handleOpenDetails(order)}
+                          sx={{
+                            textTransform: "none",
+                            fontWeight: 600,
+                            boxShadow: 2,
+                            "&:hover": {
+                              boxShadow: 4,
+                            },
+                          }}
+                        >
+                          View Details
+                        </Button>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))
@@ -211,18 +254,18 @@ export default function ActiveOrders() {
           </Table>
         </TableContainer>
 
-        {/* Status Update Dialog */}
+        {/* Status Change Dialog */}
         <Dialog
           open={statusDialogOpen}
           onClose={() => setStatusDialogOpen(false)}
         >
-          <DialogTitle>Update Order Status</DialogTitle>
+          <DialogTitle>Change Order Status</DialogTitle>
           <DialogContent>
             <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel>Status</InputLabel>
+              <InputLabel>New Status</InputLabel>
               <Select
                 value={newStatus}
-                label="Status"
+                label="New Status"
                 onChange={(e) => setNewStatus(e.target.value)}
               >
                 <MenuItem value="preparing">Preparing</MenuItem>
@@ -238,6 +281,112 @@ export default function ActiveOrders() {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Order Details Modal */}
+        <Modal
+          open={!!selectedOrder}
+          onClose={handleCloseDetails}
+          aria-labelledby="order-details-modal"
+          aria-describedby="order-details-description"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+            }}
+          >
+            {selectedOrder && (
+              <>
+                <Typography
+                  variant="h6"
+                  component="h2"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <RestaurantMenuIcon color="primary" />
+                  Order #{selectedOrder.orderNumber}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <PersonIcon fontSize="small" />
+                  Student: {getStudentName(selectedOrder.studentId)}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <ClassIcon fontSize="small" />
+                  Class: {selectedOrder.className}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <AccessTimeIcon fontSize="small" />
+                  Date:{" "}
+                  {format(new Date(selectedOrder.date), "MMM d, yyyy HH:mm")}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <AttachMoneyIcon fontSize="small" />
+                  Total Price: ₪{selectedOrder.totalPrice}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <RestaurantMenuIcon fontSize="small" />
+                  Items:
+                </Typography>
+                <Box sx={{ pl: 4 }}>
+                  {selectedOrder.items.map((item, index) => {
+                    const menuItem = menuItems.find((m) => m.id === item.id);
+                    return (
+                      <Typography
+                        key={index}
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        • {menuItem ? menuItem.name : "Unknown Item"} (x
+                        {item.quantity}) - ₪{item.price}
+                      </Typography>
+                    );
+                  })}
+                </Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleCloseDetails}
+                  sx={{ mt: 2 }}
+                >
+                  Close
+                </Button>
+              </>
+            )}
+          </Box>
+        </Modal>
       </Container>
     </Layout>
   );

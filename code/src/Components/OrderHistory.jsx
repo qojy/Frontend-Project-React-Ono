@@ -16,8 +16,16 @@ import {
   Grid,
   Card,
   CardContent,
+  Modal,
+  Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import PersonIcon from "@mui/icons-material/Person";
+import ClassIcon from "@mui/icons-material/Class";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
+import PaymentIcon from "@mui/icons-material/Payment";
 import Layout from "./Layout";
 import { format } from "date-fns";
 import { getOrdersByStatus } from "../firebase/orders";
@@ -30,6 +38,7 @@ export default function OrderHistory() {
   const [students, setStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -74,10 +83,10 @@ export default function OrderHistory() {
 
   const filteredOrders = orders.filter((order) => {
     const searchLower = searchTerm.toLowerCase();
-    const studentName = getStudentName(order.studentId).toLowerCase();
-    const items = getItemDetails(order.items).toLowerCase();
-    const orderId = order.id.toLowerCase();
-    const className = order.className.toLowerCase();
+    const studentName = (getStudentName(order.studentId) || "").toLowerCase();
+    const items = (getItemDetails(order.items) || "").toLowerCase();
+    const orderId = (order.id || "").toLowerCase();
+    const className = (order.className || "").toLowerCase();
     return (
       studentName.includes(searchLower) ||
       items.includes(searchLower) ||
@@ -85,6 +94,14 @@ export default function OrderHistory() {
       className.includes(searchLower)
     );
   });
+
+  const handleOpenDetails = (order) => {
+    setSelectedOrder(order);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedOrder(null);
+  };
 
   return (
     <Layout>
@@ -154,7 +171,7 @@ export default function OrderHistory() {
                       <Typography variant="subtitle1" sx={{ py: 3 }}>
                         {searchTerm
                           ? "No matching orders found"
-                          : "No completed orders found"}
+                          : "No delivered orders found"}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -176,6 +193,24 @@ export default function OrderHistory() {
                           variant="outlined"
                         />
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          size="small"
+                          onClick={() => handleOpenDetails(order)}
+                          sx={{
+                            textTransform: "none",
+                            fontWeight: 600,
+                            boxShadow: 2,
+                            "&:hover": {
+                              boxShadow: 4,
+                            },
+                          }}
+                        >
+                          View Details
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -183,6 +218,120 @@ export default function OrderHistory() {
             </Table>
           </TableContainer>
         </Box>
+
+        <Modal
+          open={!!selectedOrder}
+          onClose={handleCloseDetails}
+          aria-labelledby="order-details-modal"
+          aria-describedby="order-details-description"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+            }}
+          >
+            {selectedOrder && (
+              <>
+                <Typography
+                  variant="h6"
+                  component="h2"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <RestaurantMenuIcon color="primary" />
+                  Order #{selectedOrder.orderNumber}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <PersonIcon fontSize="small" />
+                  Student: {getStudentName(selectedOrder.studentId)}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <ClassIcon fontSize="small" />
+                  Class: {selectedOrder.className}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <AccessTimeIcon fontSize="small" />
+                  Date:{" "}
+                  {format(new Date(selectedOrder.date), "MMM d, yyyy HH:mm")}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <AttachMoneyIcon fontSize="small" />
+                  Total Price: ₪{selectedOrder.totalPrice}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <PaymentIcon fontSize="small" />
+                  Payment Method: {selectedOrder.paymentMethod}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <RestaurantMenuIcon fontSize="small" />
+                  Items:
+                </Typography>
+                <Box sx={{ pl: 4 }}>
+                  {selectedOrder.items.map((item, index) => {
+                    const menuItem = menuItems.find((m) => m.id === item.id);
+                    return (
+                      <Typography
+                        key={index}
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        • {menuItem ? menuItem.name : "Unknown Item"} (x
+                        {item.quantity}) - ₪{item.price}
+                      </Typography>
+                    );
+                  })}
+                </Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleCloseDetails}
+                  sx={{ mt: 2 }}
+                >
+                  Close
+                </Button>
+              </>
+            )}
+          </Box>
+        </Modal>
       </Container>
     </Layout>
   );
