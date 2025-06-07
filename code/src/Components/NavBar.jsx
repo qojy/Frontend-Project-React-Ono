@@ -17,43 +17,59 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import Button from "@mui/material/Button";
 import AppBar from "@mui/material/AppBar";
 
+const NAVBAR_HEIGHT = 64;
+
 const FloatingNav = styled(AppBar)(({ theme }) => ({
-  backgroundColor: "#4a5c23", // Dark olive green
-  backdropFilter: "blur(8px)",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-  borderBottom: "1px solid rgba(255,255,255,0.1)",
-  padding: "12px 24px",
+  backgroundColor: "#6e861f",
+  color: "#ffffff",
+  height: NAVBAR_HEIGHT,
+  minHeight: NAVBAR_HEIGHT,
+  maxHeight: NAVBAR_HEIGHT,
+  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+  display: "flex",
+  justifyContent: "center",
+  borderRadius: 0,
 }));
 
 const Logo = styled("img")({
-  height: "64px",
-  cursor: "pointer",
-  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-  borderRadius: "16px",
-  padding: "6px",
-  backgroundColor: "rgba(255,255,255,0.1)",
-  "&:hover": {
-    transform: "scale(1.05)",
-    backgroundColor: "rgba(255,255,255,0.15)",
-  },
+  height: 48,
+  borderRadius: 12,
+  padding: 0,
+  marginLeft: 8,
+  marginRight: 24,
+  alignSelf: "center",
+});
+
+const NavContent = styled("div")({
+  display: "flex",
+  alignItems: "center",
+  height: NAVBAR_HEIGHT,
+  width: "100%",
 });
 
 const StyledTabs = styled(Tabs)(({ theme }) => ({
+  height: NAVBAR_HEIGHT,
+  minHeight: NAVBAR_HEIGHT,
+  display: "flex",
+  alignItems: "center",
   "& .MuiTab-root": {
     textTransform: "none",
     fontWeight: 500,
     fontSize: "1rem",
     minWidth: 100,
-    color: "rgba(255,255,255,0.8)",
-    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-    padding: "12px 16px",
+    color: "#fff",
+    height: NAVBAR_HEIGHT,
+    minHeight: NAVBAR_HEIGHT,
+    display: "flex",
+    alignItems: "center",
+    padding: "0 16px",
     "&.Mui-selected": {
-      color: "#ffffff",
+      color: "#fff",
       fontWeight: 600,
     },
     "&:hover": {
-      color: "#ffffff",
-      backgroundColor: "rgba(255,255,255,0.1)",
+      color: "#fff",
+      backgroundColor: "rgba(255,255,255,0.08)",
     },
   },
   "& .MuiTabs-indicator": {
@@ -65,20 +81,25 @@ const StyledTabs = styled(Tabs)(({ theme }) => ({
 
 const CreateOrderButton = styled(Button)(({ theme }) => ({
   background: "#b3d236",
-  color: "#ffffff",
-  padding: "10px 24px",
-  borderRadius: "8px",
-  fontWeight: 600,
+  color: "#fff",
+  fontWeight: 700,
+  borderRadius: 8,
+  height: 40,
+  minWidth: 180,
+  marginLeft: 24,
   textTransform: "none",
-  boxShadow: "0 2px 4px rgba(179, 210, 54, 0.2)",
-  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  boxShadow: "0 2px 4px rgba(179, 210, 54, 0.18)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
   "&:hover": {
-    background: "#9cbc2e",
-    boxShadow: "0 4px 8px rgba(179, 210, 54, 0.3)",
+    background: "#8ea62b",
+    boxShadow: "0 4px 8px rgba(179, 210, 54, 0.28)",
     transform: "translateY(-1px)",
   },
   "& .MuiButton-startIcon": {
-    marginRight: "8px",
+    marginRight: 8,
   },
 }));
 
@@ -110,7 +131,7 @@ export default function CustomNavBar() {
 
   return (
     <FloatingNav position="fixed" elevation={0}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+      <NavContent>
         <Logo
           src="/ono-logo.png"
           alt="Ono Cafeteria"
@@ -137,7 +158,7 @@ export default function CustomNavBar() {
         >
           Create New Order
         </CreateOrderButton>
-      </Box>
+      </NavContent>
     </FloatingNav>
   );
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { Box } from "@mui/material";
 import Homepage from "./Components/Homepage";
 import StudentDashboard from "./Components/StudentDashboard";
 import AdminDashboard from "./Components/AdminDashboard";
@@ -14,7 +15,7 @@ import NavBar from "./Components/NavBar";
 
 function App() {
   return (
-    <>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "background.default" }}>
       <NavBar />
       <Routes>
         <Route path="/" element={<Homepage />} />
@@ -28,7 +29,7 @@ function App() {
         <Route path="/manageclasses" element={<ManageClasses />} />
         <Route path="/studentslist" element={<StudentsList />} />
       </Routes>
-    </>
+    </Box>
   );
 }
 
