@@ -16,6 +16,11 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import Button from "@mui/material/Button";
 import AppBar from "@mui/material/AppBar";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const NAVBAR_HEIGHT = 64;
 
@@ -106,25 +111,38 @@ const CreateOrderButton = styled(Button)(({ theme }) => ({
 export default function CustomNavBar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const adminTabs = [
-    { icon: <HomeIcon />, label: "Home", path: "/" },
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMenuClick = (path) => {
+    navigate(path);
+    handleClose();
+  };
+
+  const adminMenuItems = [
     { icon: <SchoolIcon />, label: "Manage Classes", path: "/manageclasses" },
     { icon: <SchoolIcon />, label: "Students List", path: "/studentslist" },
     { icon: <RestaurantIcon />, label: "Menu", path: "/menu" },
+  ];
+
+  const mainTabs = [
+    { icon: <HomeIcon />, label: "Home", path: "/" },
     { icon: <HistoryIcon />, label: "Active Orders", path: "/activeorders" },
     { icon: <HistoryIcon />, label: "Order History", path: "/orderhistory" },
     { icon: <HelpIcon />, label: "Help", path: "/help" },
   ];
-  const studentTabs = [
-    { icon: <HomeIcon />, label: "Home", path: "/" },
-    { icon: <ListAltIcon />, label: "View Status", path: "/activeorders" },
-    { icon: <HistoryIcon />, label: "Order History", path: "/orderhistory" },
-    { icon: <HelpIcon />, label: "Help", path: "/help" },
-  ];
-  const isAdmin = window.localStorage.getItem("viewMode") === "admin";
-  const tabs = isAdmin ? adminTabs : studentTabs;
-  const paths = tabs.map((tab) => tab.path);
+
+  const paths = mainTabs.map((tab) => tab.path);
   const value = paths.indexOf(location.pathname);
+
   const handleChange = (event, newValue) => {
     navigate(paths[newValue]);
   };
@@ -147,9 +165,19 @@ export default function CustomNavBar() {
             textColor="inherit"
             aria-label="navigation tabs"
           >
-            {tabs.map((tab, idx) => (
+            {mainTabs.map((tab, idx) => (
               <Tab key={tab.label} icon={tab.icon} label={tab.label} />
             ))}
+            <Tab
+              onClick={handleClick}
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <AdminPanelSettingsIcon />
+                  <span>Admin</span>
+                  <KeyboardArrowDownIcon />
+                </Box>
+              }
+            />
           </StyledTabs>
         </Box>
         <CreateOrderButton
@@ -159,6 +187,59 @@ export default function CustomNavBar() {
           Create New Order
         </CreateOrderButton>
       </NavContent>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        onClick={handleClose}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: "visible",
+            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+            mt: 1.5,
+            "& .MuiAvatar-root": {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1,
+            },
+            "&:before": {
+              content: '""',
+              display: "block",
+              position: "absolute",
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: "background.paper",
+              transform: "translateY(-50%) rotate(45deg)",
+              zIndex: 0,
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        {adminMenuItems.map((item) => (
+          <MenuItem
+            key={item.label}
+            onClick={() => handleMenuClick(item.path)}
+            sx={{
+              minWidth: 180,
+              "&:hover": {
+                backgroundColor: "rgba(179, 210, 54, 0.08)",
+              },
+            }}
+          >
+            <ListItemIcon sx={{ color: "primary.main" }}>
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText>{item.label}</ListItemText>
+          </MenuItem>
+        ))}
+      </Menu>
     </FloatingNav>
   );
 }
