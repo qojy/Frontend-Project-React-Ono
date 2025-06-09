@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -10,6 +10,8 @@ import {
   Container,
   Button,
   Snackbar,
+  CardMedia,
+  CircularProgress,
 } from "@mui/material";
 import Layout from "./Layout";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
@@ -22,6 +24,8 @@ import StudentDashboard from "./StudentDashboard";
 import AdminDashboard from "./AdminDashboard";
 import MuiAlert from "@mui/material/Alert";
 import { seedFirestore, resetFirestore } from "../firebase/seed";
+import { getOrders } from "../firebase/orders";
+import { getMenuItems } from "../firebase/menu";
 
 export default function Homepage() {
   const navigate = useNavigate();
@@ -31,6 +35,8 @@ export default function Homepage() {
     message: "",
     severity: "success",
   });
+  const [loading, setLoading] = useState(true);
+  const [topDishes, setTopDishes] = useState([]);
 
   const menuItems = [
     {
@@ -89,6 +95,42 @@ export default function Homepage() {
     }
   };
 
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      try {
+        const [orders, menuItems] = await Promise.all([
+          getOrders(),
+          getMenuItems(),
+        ]);
+        // Only delivered orders
+        const delivered = orders.filter((o) => o.status === "delivered");
+        // Count dishes
+        const dishCount = {};
+        delivered.forEach((order) => {
+          (order.items || []).forEach((item) => {
+            dishCount[item.id] = (dishCount[item.id] || 0) + item.quantity;
+          });
+        });
+        // Get top 5 dish IDs
+        const top5 = Object.entries(dishCount)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([id]) => id);
+        // Get full dish objects
+        const topDishesArr = top5
+          .map((id) => menuItems.find((m) => m.id === id))
+          .filter(Boolean);
+        setTopDishes(topDishesArr);
+      } catch (err) {
+        setTopDishes([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
     <Layout>
       <Container
@@ -140,61 +182,107 @@ export default function Homepage() {
           >
             Welcome to Ono Cafeteria
           </Typography>
-          <Grid
-            container
-            spacing={3}
-            justifyContent="center"
-            sx={{ textAlign: "center" }}
+          <Typography
+            variant="h5"
+            sx={{
+              mb: 3,
+              fontWeight: 600,
+              color: "primary.main",
+              textAlign: "center",
+            }}
           >
-            {menuItems.map((item) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={item.title}>
-                <Card
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    transition: "transform 0.2s, box-shadow 0.2s",
-                    cursor: "pointer",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      boxShadow: "0 8px 32px rgba(0,0,0,0.16)",
-                    },
-                  }}
-                  onClick={() => navigate(item.path)}
+            Top 5 Most Ordered Dishes
+          </Typography>
+          {loading ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: 200,
+              }}
+            >
+              <CircularProgress color="primary" size={60} />
+            </Box>
+          ) : (
+            <Grid
+              container
+              spacing={3}
+              justifyContent="center"
+              sx={{ textAlign: "center" }}
+            >
+              {topDishes.length === 0 ? (
+                <Typography
+                  variant="subtitle1"
+                  sx={{ width: "100%", textAlign: "center", mt: 4 }}
                 >
-                  <CardContent
-                    sx={{
-                      flexGrow: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      textAlign: "center",
-                      p: 3,
-                    }}
-                  >
-                    <Box
+                  No order history yet.
+                </Typography>
+              ) : (
+                topDishes.map((dish) => (
+                  <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={dish.id}>
+                    <Card
                       sx={{
-                        color: "primary.main",
-                        mb: 2,
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        transition: "transform 0.2s, box-shadow 0.2s",
+                        cursor: "pointer",
+                        "&:hover": {
+                          transform: "translateY(-4px)",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.16)",
+                        },
                       }}
+                      onClick={() =>
+                        navigate("/neworder", {
+                          state: { addDish: { ...dish, quantity: 1 } },
+                        })
+                      }
                     >
-                      {item.icon}
-                    </Box>
-                    <Typography
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        color: "text.primary",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {item.title}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+                      <CardMedia
+                        component="img"
+                        height="180"
+                        image={
+                          dish.image || "https://via.placeholder.com/400x240"
+                        }
+                        alt={dish.name}
+                        sx={{ objectFit: "cover" }}
+                      />
+                      <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                        <Typography
+                          variant="h5"
+                          component="h2"
+                          sx={{ fontWeight: 700, color: "text.primary" }}
+                        >
+                          {dish.name}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mb: 1 }}
+                        >
+                          {dish.description}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Allergens: {dish.allergens || "None"}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Prep Time: {dish.prepTime} min
+                        </Typography>
+                        <Typography
+                          variant="h6"
+                          color="primary"
+                          sx={{ fontWeight: 600, mt: 1 }}
+                        >
+                          ₪{dish.price}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))
+              )}
+            </Grid>
+          )}
         </Box>
         {/* Student Dashboard Section */}
         <Typography

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   Button,
@@ -42,6 +42,7 @@ import { getStudents } from "../firebase/students";
 
 export default function NewOrder() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedStudent, setSelectedStudent] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -54,6 +55,24 @@ export default function NewOrder() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Add dish from homepage if present
+  useEffect(() => {
+    if (location.state && location.state.addDish) {
+      setCart((prevCart) => {
+        const exists = prevCart.find(
+          (item) => item.id === location.state.addDish.id
+        );
+        if (exists) {
+          // Do nothing if already exists
+          return prevCart;
+        } else {
+          return [...prevCart, location.state.addDish];
+        }
+      });
+    }
+    // eslint-disable-next-line
+  }, [location.state]);
 
   const loadData = async () => {
     setLoading(true);
