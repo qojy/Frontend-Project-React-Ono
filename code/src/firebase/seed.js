@@ -80,21 +80,25 @@ export async function seedFirestore() {
   const random = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
   // Seed orders with real references and a mix of statuses
-  const statuses = [
-    "preparing",
-    "active",
-    "delivered",
-    "delivered",
-    "preparing",
-    "active",
-    "delivered",
+  const statuses = ["preparing", "active", "delivered"];
+  const dates = [
+    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+    new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days ago
+    new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+    new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
+    new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+    new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
   ];
-  for (let i = 0; i < 7; i++) {
+
+  // Create 10 orders with different statuses and dates
+  for (let i = 0; i < 10; i++) {
     const student = random(students);
     const classObj = random(classes);
     const items = [random(menuItems)];
     if (Math.random() > 0.5) items.push(random(menuItems));
-    await addOrder({
+
+    const orderData = {
       student: student.fullName,
       studentId: student.id,
       className: classObj.name,
@@ -103,13 +107,20 @@ export async function seedFirestore() {
         id: item.id,
         name: item.name,
         price: item.price,
-        quantity: 1,
+        quantity: Math.floor(Math.random() * 2) + 1, // Random quantity between 1 and 2
       })),
       totalPrice: items.reduce((sum, item) => sum + item.price, 0),
       paymentMethod: random(["cash", "credit", "bit"]),
       status: statuses[i % statuses.length],
-      date: new Date().toISOString(),
-    });
+      date: dates[i % dates.length],
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      await addOrder(orderData);
+    } catch (error) {
+      console.error("Error adding order:", error);
+    }
   }
 
   return "Seeding complete!";
